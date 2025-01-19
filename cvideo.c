@@ -5,9 +5,10 @@
 #include <stdio.h>
 
 // Sync PIO needs 2us per instruction
-#define SYNC_INTERVAL 0.000002
-// Data transmits for 52us
-#define DATA_INTERVAL 0.000052
+//#define SYNC_INTERVAL 0.000002
+#define SYNC_INTERVAL ((float)(27*15734))
+// Data transmits for 52.6us
+#define DATA_INTERVAL 0.0000526
 
 #define DATA_SM_ID 0
 #define SYNC_SM_ID 1
@@ -26,7 +27,7 @@ static void cvdata_isr(void) {
 
 void cvideo_init(PIO pio, uint data_pin, uint sync_pin, cvideo_data_callback_t callback) {
     if (CVIDEO_PIX_PER_LINE % 32 != 0) {
-        printf("ERROR: Horizontal pixel count must be a multiple of 32\r\n");
+        //printf("ERROR: Horizontal pixel count must be a multiple of 32\r\n");
     }
     else {
         cvideo_pio = pio;
@@ -37,15 +38,16 @@ void cvideo_init(PIO pio, uint data_pin, uint sync_pin, cvideo_data_callback_t c
 
         // Run the data clock 32x faster than needed to reduce horizontal jitter due to synchronisation between SMs
         float data_clockdiv = (clock_get_hz(clk_sys) / (CVIDEO_PIX_PER_LINE / DATA_INTERVAL)) / CLOCKS_PER_BIT;
-        float sync_clockdiv = clock_get_hz(clk_sys) * SYNC_INTERVAL;
-        
+        //float sync_clockdiv = clock_get_hz(clk_sys) * SYNC_INTERVAL;
+        float sync_clockdiv = clock_get_hz(clk_sys) / SYNC_INTERVAL;
+
         if (data_clockdiv < 1) {
-            printf("WARNING: PIO data SM clock divider (value %f) less than 1\r\n", data_clockdiv);
+            //printf("WARNING: PIO data SM clock divider (value %f) less than 1\r\n", data_clockdiv);
         }
 
-        printf("Data clockdiv %f\r\n", data_clockdiv);
-        printf("Sync clockdiv %f\r\n", sync_clockdiv);
-        
+        //printf("Data clockdiv %f\r\n", data_clockdiv);
+        //printf("Sync clockdiv %f\r\n", sync_clockdiv);
+
         uint offset_sync = pio_add_program(pio, &cvsync_program);
         uint offset_data = pio_add_program(pio, &cvdata_program);
 
@@ -81,7 +83,6 @@ static inline void cvdata_program_init(PIO pio, uint sm, uint offset, float cloc
     c.shiftctrl |= (1u<<PIO_SM0_SHIFTCTRL_AUTOPULL_LSB) |
                   (0u<<PIO_SM0_SHIFTCTRL_PULL_THRESH_LSB);
 
-    
     // Load our configuration, and jump to the start of the program
     pio_sm_init(pio, sm, offset, &c);
 

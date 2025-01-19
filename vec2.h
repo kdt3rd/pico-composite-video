@@ -30,9 +30,9 @@ inline float vec2_length(vec2_t vec) {
   return sqrt((vec.v0 * vec.v0) + (vec.v1 * vec.v1));
 }
 
-inline void vec2_print(vec2_t vec) {
-  printf("v: (%f, %f)\r\n", vec.v0, vec.v1);
-  printf("len %f\r\n", vec2_length(vec));
-}
+//inline void vec2_print(vec2_t vec) {
+//  printf("v: (%f, %f)\r\n", vec.v0, vec.v1);
+//  printf("len %f\r\n", vec2_length(vec));
+//}
 
 #endif

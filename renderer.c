@@ -80,7 +80,7 @@ void renderer_init(renderer_draw_callback_t callback){
 void renderer_run(void) {
   if (data_underrun) {
     data_underrun = false;
-    printf("Data underrun!\r\n");
+    //printf("Data underrun!\r\n");
   }
   if (drawing_overrun) {
     //printf("Drawing too slow! \r\n");
@@ -201,7 +201,7 @@ void renderer_draw_string(unsigned int x, unsigned int y, unsigned int scale, ch
         break;
 
       default:
-        printf("Invalid justification\r\n");
+          //printf("Invalid justification\r\n");
     }
   }
 }
