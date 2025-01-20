@@ -34,13 +34,13 @@
 data_loop:
 	; set sync low for 2 cycles
 	set pins 0 [1]
-	; set sync high for 4 cycles ('back porch')
-	set pins 1 [3]
+	; set sync high for 2 cycles ('back porch')
+	set pins 1 [1]
 	
 	; genearate signal for data machine
 	irq nowait DATA_IRQ
-	; wait until end of line 2 set + 4 set + irq + jmp + 19
-	nop [18]
+	; wait until end of line 2 set + 2 set + irq + jmp + 21
+	nop [20]
 	jmp y-- data_loop
 	
 .wrap              
