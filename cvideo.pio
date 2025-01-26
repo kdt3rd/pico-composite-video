@@ -9,10 +9,15 @@
 .define DATA_DELAY 4
 
 .define DATA_IRQ 0
+.define SYNC_IRQ 1
 .define PUBLIC CLOCKS_PER_BIT DATA_DELAY + 2
 
 .program cvsync
 
+; front porch 1.5us
+; hsync 4.7us
+; csync 4.7us
+; data 52.6
 ; Number of video lines per field stored in OSR
 ; Y register used as odd/even flag: FFFFFFFF = odd, 0 = even
 .wrap_target

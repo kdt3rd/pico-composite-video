@@ -8,8 +8,8 @@
 // For very high or very low pixel counts, DATA_DELAY within cvideo.pio may need adjustment
 #define CVIDEO_PIX_PER_LINE 640
 
-typedef uint32_t (*cvideo_data_callback_t)(void); 
+typedef uint32_t *(*cvideo_data_callback_t)(uint32_t line);
 
-void cvideo_init(PIO pio, uint data_pin, uint sync_pin, cvideo_data_callback_t callback); 
+void cvideo_init(cvideo_data_callback_t callback); 
 
 #endif

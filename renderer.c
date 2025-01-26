@@ -37,28 +37,11 @@ static void renderer_clear(buffer_t *buffer);
 static void update_output_buffer(void);
 
 // Callback for shipping out image words to cvideo peripheral
-uint32_t data_callback(void) {
-  uint32_t *line = (*output_buffer)[current_line];
-  uint32_t data = line[current_pix];
-  current_pix++;
-
-  if (current_pix == LINE_WORD_COUNT) {
-    current_pix = 0;
-    current_line = current_line + 2;
-
-    if (current_line == CVIDEO_LINES + 1){
-      current_line = 0;
-      update_output_buffer();
-    }
-    else if (current_line == CVIDEO_LINES){
-      current_line = 1;
-      update_output_buffer();
-    }
-  }
-  if (pio_sm_is_tx_fifo_empty(pio0, 0)) {
-      data_underrun = true;
-  }
-  return data;
+uint32_t *data_callback(uint32_t line) {
+    uint32_t *retline = (*output_buffer)[line];
+    if (line == (CVIDEO_LINES - 1))
+        update_output_buffer();
+    return retline;
 }
 
 void renderer_init(renderer_draw_callback_t callback){
@@ -74,7 +57,7 @@ void renderer_init(renderer_draw_callback_t callback){
   current_line = 1;
   current_pix = 0;
 
-  cvideo_init(pio0, CVIDEO_DATA_PIN, CVIDEO_SYNC_PIN, data_callback);
+  cvideo_init(data_callback);
 }
 
 void renderer_run(void) {
