@@ -2,6 +2,7 @@
 #include "cvideo.h"
 #include "cvideo.pio.h"
 #include "hardware/clocks.h"
+#include "hardware/dma.h"
 #include "hardware/irq.h"
 #include <stdio.h>
 
@@ -20,7 +21,8 @@ static uint data_stream_irq_id = DMA_IRQ_0;
 static cvideo_data_callback_t data_callback;
 static uint dma_data_channel;
 static uint data_vline = 0;
-static uint32_t zero_buf[(CVIDEO_PIX_PER_LINE + 31) / 32] = {0};
+#define WIDTH_UINT32 ((CVIDEO_PIX_PER_LINE + 31) / 32)
+static uint32_t zero_buf[WIDTH_UINT32] = {0};
 
 //uint dma_channel_0;
 
@@ -103,17 +105,17 @@ static void cvideo_data_pio_handler_ntsc(void)
     }
     switch (data_vline)
     {
-        case 0 .. 19:
-        case 260 .. 261:
-        case 262 .. 281:
-        case 522 .. 524:
+        case 0 ... 19:
+        case 260 ... 261:
+        case 262 ... 281:
+        case 522 ... 524:
         default:
-            dma_channel_set_read_addr(data_dma_channel, zero_buf, true);
+            dma_channel_set_read_addr(dma_data_channel, zero_buf, true);
             data_vline++;
             break;
-        case 20 .. 259:
-        case 282 .. 521:
-            dma_channel_set_read_addr(data_dma_channel, data_callback(data_vline++), true);
+        case 20 ... 259:
+        case 282 ... 521:
+            dma_channel_set_read_addr(dma_data_channel, data_callback(data_vline++), true);
             break;
     }
 
@@ -127,7 +129,7 @@ static void cvideo_data_pio_handler_other(void)
     if(data_vline >= CVIDEO_LINES) {
         data_vline = 0;
     }
-    dma_channel_set_read_addr(data_dma_channel, data_callback(data_vline++), true);
+    dma_channel_set_read_addr(dma_data_channel, data_callback(data_vline++), true);
 
     // reset IRQ
     irq_clear(data_stream_irq_id);
@@ -165,7 +167,7 @@ void cvideo_init(cvideo_data_callback_t callback) {
     cvdata_program_init(cvideo_pio, DATA_SM_ID, offset_data, data_clockdiv, data_pin);
     cvsync_program_init(cvideo_pio, SYNC_SM_ID, offset_sync, sync_clockdiv, sync_pin);
 
-    cvideo_configure_pio_dma( cvideo_pio, DATA_SM_ID, data_dma_channel, DMA_SIZE_32, width, NULL );
+    cvideo_configure_pio_dma( cvideo_pio, DATA_SM_ID, dma_data_channel, DMA_SIZE_32, WIDTH_UINT32 );
 
     if (CVIDEO_LINES == 525)
         irq_set_exclusive_handler(data_stream_irq_id, cvideo_data_pio_handler_ntsc);
@@ -181,7 +183,7 @@ void cvideo_init(cvideo_data_callback_t callback) {
     }
 
     // Set the state machines running
-	pio_enable_sm_mask_in_sync(pio_0, (1u << DATA_SM_ID) | (1u << SYNC_SM_ID));
+	pio_enable_sm_mask_in_sync(cvideo_pio, (1u << DATA_SM_ID) | (1u << SYNC_SM_ID));
     //pio_sm_set_enabled(pio, sm, true);
 }
 
