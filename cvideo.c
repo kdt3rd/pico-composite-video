@@ -17,7 +17,7 @@
 
 static PIO cvideo_pio;
 static uint data_sync_irq_id = PIO0_IRQ_0;
-static uint data_stream_irq_id = DMA_IRQ_0;
+static uint data_stream_irq_id = PIO0_IRQ_1;//DMA_IRQ_0;
 static cvideo_data_callback_t data_callback;
 static uint dma_data_channel;
 static uint data_vline = 0;

@@ -54,10 +54,11 @@ data_loop:
 .program cvdata
 .wrap_target
     set pins 0
-    mov y x
+    ;;; mov y x
     wait 1 irq DATA_IRQ
 data_out:
     out pins, 1 [DATA_DELAY]; [30]
-    jmp y-- data_out
-
+    jmp !OSRE data_out
+    set pins 0
+    irq set SYNC_IRQ
 .wrap
